@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-
 import { FaTimes } from 'react-icons/fa';
 import { GoCircleSlash } from 'react-icons/go';
+
+import CardCell from './CardCell';
 
 const Container = styled.div`
   display: grid;
@@ -22,57 +23,18 @@ const Container = styled.div`
             user-select: none;
 `;
 
-const Cell = styled.div`
-  background-color: ${({ afterCurrent }) => afterCurrent ? '#ccc' : '#33ccff'};
-  ${({ current }) => current && 'background-color: #ffff99;'}
-  ${({ type }) => (type === 1) && 'background-color: #00ff80;'}
-  ${({ current, afterCurrent, type }) => (!current && type === 0 && !afterCurrent) && 'background-color: #fff;'}
-  width: 100%;
-  height: 100%;
-  border: 1px solid #333;
-
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const CellDate = styled.div`
-  background-color: #333;
-  color: #fff;
-  width: 100%;
-  font-size: 14px;
-  white-space: nowrap;
-  height: 1.5rem;
-  border-bottom: 2px solid black;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-`;
-
-const CellContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  width: auto;
-  height: 100%;
-`;
-
 class XCard extends React.Component {
   constructor(props) {
     super(props);
 
-    let initCardState = [{}];
-    let initLength = 30;
-    //testing variables
+    let cardState = [{}];
+    let cardLength = 30;
     const TODAY = new Date();
+
+    // TODO: Each Card must have its own START DATE variable to track what the first day is
     let startDate = new Date();
     startDate.setDate(TODAY.getDate() - 3);
 
-    // load in sample Date data
     let dates = [{}];
     const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -94,7 +56,7 @@ class XCard extends React.Component {
 
     //The purpose of this is to generate days of the month to output to the card
     // at a later time, the startDate variable would have to be received via API
-    for (let i = 0; i < initLength; i++) {
+    for (let i = 0; i < cardLength; i++) {
 
       dates[i] = {
         day: currentDay,
@@ -102,10 +64,11 @@ class XCard extends React.Component {
         month: currentMonth,
       }
 
-      //iterate to the next day
+      //iterate the day number. If it's the maximum days in the month then reset back to 1
       if (currentDay === DAYS_IN_MONTH[currentMonth - 1]) {
-        //if at the end of a month, reset back to 0 and iterate month
         currentDay = 1;
+
+        //If it's December, reset back to January
         if (currentMonth === 12) {
           currentMonth = 1;
         } else {
@@ -114,7 +77,8 @@ class XCard extends React.Component {
       } else {
         currentDay = currentDay + 1;
       }
-      //iterate day index (to retreive Sun, Mon, etc.)
+      //Iterate dayIndex
+      // Resets back to 0 after 6 since 7 days in the week
       if (dayIndex === 6) {
         dayIndex = 0;
       } else {
@@ -122,14 +86,12 @@ class XCard extends React.Component {
       }
     }
 
-    console.log("Today's Day #: " + TODAY.getDate());
-    console.log("Today's Month #: " + (TODAY.getMonth() + 1));
     let todayIndex = -1;
-    for (let j = 0; j < initLength; j++) {
+    for (let j = 0; j < cardLength; j++) {
       let { dayName, month, day} = dates[j];
       let isToday = (TODAY.getDate() == day) && (TODAY.getMonth()+1 == month);
       if (isToday) todayIndex = j;
-      initCardState[j] = {
+      cardState[j] = {
         type: 0,
         current: isToday,
         content: (todayIndex === -1) ? <GoCircleSlash size={'4rem'} style={{ color: '#ff003b'}}/> : <div />,
@@ -138,7 +100,7 @@ class XCard extends React.Component {
     }
 
     this.state = {
-      status: initCardState,
+      status: cardState,
       currentIndex: todayIndex,
     }
 
@@ -173,14 +135,18 @@ class XCard extends React.Component {
       }
     }
 
+
+    //Save New Cell Data
     currentCell = {
       ...currentCell,
       type: newType,
       content: cellContent,
     }
 
+    //Update the state's "status" at the specific cell index
     newStatus[index] = currentCell;
 
+    //Update the state
     this.setState({
       ...this.state,
       status: newStatus,
@@ -192,35 +158,17 @@ class XCard extends React.Component {
     return (
       <Container>
         {status.map((cell, index) => {
-          //check if the current element falls before or after the "current"
-          let afterCurrent = false;
-          if (index > currentIndex) {
-            afterCurrent = true;
-          }
-
-          /*
-          <Cell
+          return (
+            <CardCell
               key={index}
               type={cell.type}
               current={cell.current}
-              afterCurrent={afterCurrent}
+              afterCurrent={index > currentIndex}
               onMouseDown={() => this.toggleX(index)}
-            >
-            {cell.content}
-          </Cell>
-          */
-          return <Cell
-              key={index}
-              type={cell.type}
-              current={cell.current}
-              afterCurrent={afterCurrent}
-              onMouseDown={() => this.toggleX(index)}
-            >
-              <CellDate current={cell.current}>{cell.date}</CellDate>
-              <CellContent>
-                {cell.content}
-              </CellContent>
-          </Cell>
+              date={cell.date}
+              content={cell.content}
+            />
+          );
         })}
       </Container>
     );
