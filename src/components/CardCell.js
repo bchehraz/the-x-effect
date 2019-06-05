@@ -4,10 +4,7 @@ import styled from 'styled-components';
 import CardCellDate from './CardCellDate';
 
 const Cell = styled.div`
-  background-color: ${({ afterCurrent }) => afterCurrent ? '#ccc' : '#33ccff'};
-  ${({ current }) => current && 'background-color: #ffff99;'}
-  ${({ type }) => (type === 1) && 'background-color: #00ff80;'}
-  ${({ current, afterCurrent, type }) => (!current && type === 0 && !afterCurrent) && 'background-color: #fff;'}
+  background-color: ${({ bg }) => bg};
   width: 100%;
   height: 100%;
   border: 1px solid #333;
@@ -29,14 +26,28 @@ const CellContent = styled.div`
 
 const CardCell = (props) => {
   const { type, current, afterCurrent, onMouseDown, date, content } = props;
+
+  let color = '#33ccff';
+
+
+  if (afterCurrent) {
+    color = '#ccc';
+  } else if (current) {
+    color = '#33ccff';
+  } else {
+    color = '#fff';
+  }
+
+  if (type === 1) {
+    color = '#00ff80';
+  }
+
   return (
     <Cell
-      type={type}
-      current={current}
-      afterCurrent={afterCurrent}
       onMouseDown={onMouseDown}
+      bg={color}
     >
-      <CardCellDate date={date} />
+      <CardCellDate date={date} type={type} bg={color} />
       <CellContent>
         {content}
       </CellContent>
