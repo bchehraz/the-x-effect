@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaTimes } from 'react-icons/fa';
 import { GoCircleSlash } from 'react-icons/go';
+import _ from 'lodash';
 
 import CardCell from './CardCell';
 
@@ -29,9 +30,18 @@ class XCard extends React.Component {
 
     let cardState = [{}];
     let cardLength = 30;
+    let archived = false;
     const TODAY = new Date();
 
+    if (archived) {
+      // load in old card data,
+      // get the start date based on this
+    }
+
     // TODO: Each Card must have its own START DATE variable to track what the first day is
+    //TODO: Each Card must have its own TODAY_INDEX.
+    //      - If it is an older card, it does not need one and can skip this step
+
     let startDate = new Date();
     startDate.setDate(TODAY.getDate() - 3);
 
@@ -102,6 +112,9 @@ class XCard extends React.Component {
     this.state = {
       status: cardState,
       currentIndex: todayIndex,
+      startDate: startDate,
+      title: '',
+      archived: false,
     }
 
     this.toggleX = this.toggleX.bind(this);
@@ -109,7 +122,7 @@ class XCard extends React.Component {
 
   toggleX(index) {
     //update grid status
-    let newStatus = this.state.status;
+    let newStatus = _.clone(this.state.status);
     let currentCell = newStatus[index];
     let cellContent = currentCell.content;
     let newType = 0;
@@ -149,8 +162,16 @@ class XCard extends React.Component {
     //Update the state
     this.setState({
       ...this.state,
-      status: newStatus,
+      status: [...newStatus],
     });
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevState.status === this.state.status) {
+      console.log("XCard state has not changed");
+    } else {
+      console.log("XCard state changed");
+    }
   }
 
   render() {

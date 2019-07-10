@@ -4,6 +4,7 @@ module.exports = {
     description: `Kick off your new habits with The X Effect.`,
     author: `@bchehraz`,
   },
+  pathPrefix: "/the-x-effect",
   plugins: [
     `gatsby-plugin-react-helmet`,
     {
@@ -84,5 +85,6 @@ module.exports = {
         noInlineHighlight: false,
       },
     },
+    `gatsby-plugin-lodash`,
   ],
 }
